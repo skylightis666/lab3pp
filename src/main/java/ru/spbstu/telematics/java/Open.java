@@ -13,7 +13,7 @@ public class Open implements Runnable
     {
         while (window.actions.size() != 0)
         {
-            window.start_open();
+            window.startOpen();
         }
     }
 }

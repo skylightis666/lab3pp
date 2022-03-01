@@ -1,41 +1,39 @@
 package ru.spbstu.telematics.java;
 
 import java.util.ArrayList;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class Window
 {
-    private boolean full_open;
-    private boolean full_close;
+    private boolean fullOpen;
+    private boolean fullClose;
     private int percent;
-    private int time_passed;
-    private int hold_button_time;
-    private int delta_time;
-    private int t;
+    private int timePassed;
+    private int holdButtonTime;
+    private final int deltaTime;
+    private final int t;
 
     public ArrayList<Integer> actions;
 
 
     Window(ArrayList<Integer> actions, int R, int t)
     {
-        full_close = true;
-        full_open = false;
+        fullClose = true;
+        fullOpen = false;
         percent = 0;
-        time_passed = 0;
-        delta_time = R/100;
-        hold_button_time = 0;
+        timePassed = 0;
+        deltaTime = R/100;
+        holdButtonTime = 0;
         this.actions = actions;
         this.t = t;
     }
 
-    void AddOpened_percent()
+    void addOpenedPercent()
     {
-        if (!full_open)
+        if (!fullOpen)
         {
-            time_passed += delta_time;
+            timePassed += deltaTime;
             percent += 1;
-            CheckWindowStatus();
+            checkWindowStatus();
             System.out.println(percent + " открывается");
         } else
         {
@@ -43,13 +41,13 @@ public class Window
         }
     }
 
-    void SubOpened_percent()
+    void subOpenedPercent()
     {
-        if (!full_close)
+        if (!fullClose)
         {
-            time_passed += delta_time;
+            timePassed += deltaTime;
             percent -= 1;
-            CheckWindowStatus();
+            checkWindowStatus();
             String str;
             System.out.println(percent + " закрывается");
         } else
@@ -58,24 +56,24 @@ public class Window
         }
     }
 
-    void CheckWindowStatus()
+    void checkWindowStatus()
     {
         if (percent == 0)
         {
-            full_close = true;
-            full_open = false;
+            fullClose = true;
+            fullOpen = false;
         } else if (percent == 100)
         {
-            full_close = false;
-            full_open = true;
+            fullClose = false;
+            fullOpen = true;
         } else
         {
-            full_close = false;
-            full_open = false;
+            fullClose = false;
+            fullOpen = false;
         }
     }
 
-    synchronized void start_close()
+    synchronized void startClose()
     {
         try
         {
@@ -83,24 +81,24 @@ public class Window
                 wait();
             if (actions.size() != 0)
             {
-                hold_button_time = actions.get(0);
+                holdButtonTime = actions.get(0);
                 actions.remove(0);
-                if (hold_button_time < t * delta_time)
-                    hold_button_time = 100 * delta_time;
-                time_passed = 0;
+                if (holdButtonTime < t * deltaTime)
+                    holdButtonTime = 100 * deltaTime;
+                timePassed = 0;
 
                 System.out.println("Start close");
-                while (time_passed < hold_button_time)
+                while (timePassed < holdButtonTime)
                 {
-                    if (full_close)
+                    if (fullClose)
                     {
                         System.out.println("Окно полностью закрыто");
                         break;
                     }
                     try
                     {
-                        Thread.sleep(delta_time);
-                        SubOpened_percent();
+                        Thread.sleep(deltaTime);
+                        subOpenedPercent();
                     } catch (InterruptedException e)
                     {
                         System.out.println("Поток был прерван");
@@ -115,7 +113,7 @@ public class Window
         }
     }
 
-    synchronized void start_open()
+    synchronized void startOpen()
     {
         try
         {
@@ -123,24 +121,24 @@ public class Window
                 wait();
             if (actions.size() != 0)
             {
-                hold_button_time = actions.get(0) * -1;
+                holdButtonTime = actions.get(0) * -1;
                 actions.remove(0);
-                if (hold_button_time < t * delta_time)
-                    hold_button_time = 100 * delta_time;
-                time_passed = 0;
+                if (holdButtonTime < t * deltaTime)
+                    holdButtonTime = 100 * deltaTime;
+                timePassed = 0;
 
                 System.out.println("Start open");
-                while (time_passed < hold_button_time)
+                while (timePassed < holdButtonTime)
                 {
-                    if (full_open)
+                    if (fullOpen)
                     {
                         System.out.println("Окно полностью открыто");
                         break;
                     }
                     try
                     {
-                        Thread.sleep(delta_time);
-                        AddOpened_percent();
+                        Thread.sleep(deltaTime);
+                        addOpenedPercent();
                     } catch (InterruptedException e)
                     {
                         System.out.println("Поток был прерван");
